@@ -1,6 +1,9 @@
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs";
 
-kaboom();
+kaboom({
+    width: 1000,
+    height: 600
+});
 
 scene("title", ()=>{
     add([
@@ -14,18 +17,18 @@ scene("title", ()=>{
         scale(2)
     ])
     add([
-        text("Press Space to Start"),
+        text("Click to Start"),
         anchor("center"),
         pos(width() / 2, height() / 2),
         scale(1.5)
     ])
     add([
-        text("Up Arrow to Charge Bow"),
+        text("Click to Charge Bow"),
         anchor("center"),
         pos(width() / 2, height() / 1.5),
         scale(1)
     ])
-    onKeyPress("space", ()=>{go("game");})
+    onClick(()=>{go("game");});
 })
 
 loadSound("game", "sfx/calm-music-64526.mp3");
@@ -55,8 +58,10 @@ scene("game", ()=>{
     let launch = false;
     let hit = false;
     let liveCount = 3;
+    let livesGained = 0;
     let scoreCount = 0;
     let arrowCount = 5;
+    let shoot = false;
     music.paused = false;
     add([
         sprite("background", {width:width(), height:height()}),
@@ -124,15 +129,15 @@ scene("game", ()=>{
         area(),
         "bow"
     ])
-    onKeyDown("up", ()=>{
-        if(launch == false && hit == false && arrowCount > 0 && powerMeter.width <= width() / 6) {
+    onMouseDown(()=>{
+        if(launch == false && hit == false && arrowCount > 0 && shoot == true && powerMeter.width <= width() / 6) {
             xv += 4;
-            yv += 3;
+            yv += 4;
             powerMeter.width += 3.5;
         }
     })
-    onKeyRelease("up", ()=>{
-        if(arrowCount > 0) {
+    onMouseRelease(()=>{
+        if(arrowCount > 0 && shoot == true) {
             launch = true;
             powerMeter.width = 0;
             play("bow_shot");
@@ -153,13 +158,19 @@ scene("game", ()=>{
     })
     bow.onCollide("target", ()=>{
         scoreCount++;
-        liveCount++;
-        lives.text = "Lives: " + liveCount;
+        livesGained++;
+        if(livesGained % 3 == 0) {
+            liveCount++;
+            lives.text = "Lives: " + liveCount;
+        }
         score.text = "Score: " + scoreCount;
-        arrowCount = 5;
+        arrowCount++;
         arrows.text = "Arrows: " + arrowCount;
         play("cut");
         reset();
+    })
+    wait(0.3, ()=>{
+        shoot = true;
     })
     onUpdate(()=>{
         if(launch == true && hit == false) {
@@ -223,13 +234,13 @@ scene("gameover", ()=>{
         color(0, 0, 0)
     ])
     add([
-        text("Press Space to Restart"),
+        text("Click to Restart"),
         anchor("center"),
         pos(width() / 2, height() / 1.5),
         scale(1.5),
         color(0, 0, 0)
     ])
-    onKeyPress("space", ()=>{go("game");})
+    onClick(()=>{go("game");});
 })
 
 go("title");
