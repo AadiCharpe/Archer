@@ -65,6 +65,8 @@ scene("game", ()=>{
     let arrowCount = 5;
     let shoot = false;
     music.paused = false;
+    let hitArrows = [];
+
     add([
         sprite("background", {width:width(), height:height()}),
         pos(0, 0)
@@ -74,8 +76,7 @@ scene("game", ()=>{
         anchor("center"),
         pos(width() / 2, height()),
         color(96, 197, 86),
-        area(),
-        body({isStatic: true})
+        area()
     ])
     const lives = add([
         text("Lives: " + liveCount),
@@ -114,7 +115,6 @@ scene("game", ()=>{
         pos(width() * 0.9, height() * 0.85),
         scale(0.5),
         area(),
-        body(),
         "brother"
     ])
     const target = add([
@@ -152,11 +152,11 @@ scene("game", ()=>{
         lives.text = "Lives: " + liveCount;
         arrowCount--;
         arrows.text = "Arrows: " + arrowCount;
-        add([
+        hitArrows.push(add([
             sprite("arrow_hit"),
             pos(bow.pos),
             scale(0.3),
-        ])
+        ]));
         play("brotherhit");
         reset();
     })
@@ -171,6 +171,8 @@ scene("game", ()=>{
         arrowCount += 2;
         arrows.text = "Arrows: " + arrowCount;
         brother.pos.x = Math.random() * width() / 2 + width() / 2;
+        for(let i = 0; i < hitArrows.length; i++)
+            hitArrows[i].pos.x = brother.pos.x - 100;
         play("cut");
         reset();
     })
@@ -206,8 +208,6 @@ scene("game", ()=>{
         }
         if(arrowCount == 0 || liveCount == 0)
             go("gameover");
-        if(brother.isGrounded())
-            brother.jump(500);
         target.pos.y = brother.pos.y - 75;
         target.pos.x = brother.pos.x;
     })
