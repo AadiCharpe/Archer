@@ -5,6 +5,8 @@ kaboom({
     height: 600
 });
 
+setGravity(1500);
+
 scene("title", ()=>{
     add([
         rect(width(), height()),
@@ -65,14 +67,15 @@ scene("game", ()=>{
     music.paused = false;
     add([
         sprite("background", {width:width(), height:height()}),
-        pos(0, 0),
-        area(),
+        pos(0, 0)
     ])
     add([
         rect(width(), height() / 8),
         anchor("center"),
         pos(width() / 2, height()),
-        color(96, 197, 86)
+        color(96, 197, 86),
+        area(),
+        body({isStatic: true})
     ])
     const lives = add([
         text("Lives: " + liveCount),
@@ -111,6 +114,7 @@ scene("game", ()=>{
         pos(width() * 0.9, height() * 0.85),
         scale(0.5),
         area(),
+        body(),
         "brother"
     ])
     const target = add([
@@ -132,7 +136,7 @@ scene("game", ()=>{
     onMouseDown(()=>{
         if(launch == false && hit == false && arrowCount > 0 && shoot == true && powerMeter.width <= width() / 6) {
             xv += 4;
-            yv += 4;
+            yv += 5;
             powerMeter.width += 3.5;
         }
     })
@@ -159,13 +163,14 @@ scene("game", ()=>{
     bow.onCollide("target", ()=>{
         scoreCount++;
         livesGained++;
-        if(livesGained % 3 == 0) {
+        if(livesGained % 2 == 0) {
             liveCount++;
             lives.text = "Lives: " + liveCount;
         }
         score.text = "Score: " + scoreCount;
-        arrowCount++;
+        arrowCount += 2;
         arrows.text = "Arrows: " + arrowCount;
+        brother.pos.x = Math.random() * width() / 2 + width() / 2;
         play("cut");
         reset();
     })
@@ -201,6 +206,10 @@ scene("game", ()=>{
         }
         if(arrowCount == 0 || liveCount == 0)
             go("gameover");
+        if(brother.isGrounded())
+            brother.jump(500);
+        target.pos.y = brother.pos.y - 75;
+        target.pos.x = brother.pos.x;
     })
     function reset() {
         bow.pos.x = 125;
@@ -227,10 +236,10 @@ scene("gameover", ()=>{
         color(0, 0, 0)
     ])
     add([
-        text("You either ran out of arrows or lives"),
+        text("You ran out of arrows or lives"),
         anchor("center"),
         pos(width() / 2, height() / 2),
-        scale(1.5),
+        scale(1.3),
         color(0, 0, 0)
     ])
     add([
